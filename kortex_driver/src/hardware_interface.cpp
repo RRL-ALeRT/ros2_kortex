@@ -649,6 +649,8 @@ return_type KortexMultiInterfaceHardware::perform_command_mode_switch(
 CallbackReturn KortexMultiInterfaceHardware::on_activate(
   const rclcpp_lifecycle::State & /* previous_state */)
 {
+  first_read_pass_ = first_write_pass_ = true;
+
   RCLCPP_INFO(LOGGER, "Activating KortexMultiInterfaceHardware...");
   // first read
   auto base_feedback = base_cyclic_.RefreshFeedback();
@@ -799,7 +801,7 @@ void KortexMultiInterfaceHardware::readGripperPosition()
 }
 
 return_type KortexMultiInterfaceHardware::write(
-  const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
+  const rclcpp::Time & time, const rclcpp::Duration & /*period*/)
 {
   if (block_write)
   {
@@ -850,24 +852,33 @@ return_type KortexMultiInterfaceHardware::write(
   {
     if (arm_mode_ == k_api::Base::ServoingMode::SINGLE_LEVEL_SERVOING)
     {
-      // Twist controller active
-      if (twist_controller_running_)
-      {
-        // twist control
-        sendTwistCommand();
-      }
-      else
-      {
-        // Keep alive mode - no controller active
-        RCLCPP_DEBUG(LOGGER, "No controller active in SINGLE_LEVEL_SERVOING mode!");
-      }
+      rclcpp::Duration custom_period = rclcpp::Duration::from_seconds(1/25);
 
-      // gripper control
-      sendGripperCommand(
-        arm_mode_, gripper_command_position_, gripper_command_max_velocity_,
-        gripper_command_max_force_);
-      // read after write in twist mode
-      feedback_ = base_cyclic_.RefreshFeedback();
+      if (first_write_pass_ || (time - last_write_time_ ) > custom_period)
+      {
+        first_write_pass_ = false;
+        last_write_time_ = time;
+
+        // Twist controller active
+        if (twist_controller_running_)
+        {
+          // twist control
+          sendTwistCommand();
+        }
+        else
+        {
+          // Keep alive mode - no controller active
+          RCLCPP_DEBUG(LOGGER, "No controller active in SINGLE_LEVEL_SERVOING mode!");
+        }
+
+        // gripper control
+        sendGripperCommand(
+          arm_mode_, gripper_command_position_, gripper_command_max_velocity_,
+          gripper_command_max_force_);
+
+        // read after write in twist mode
+        feedback_ = base_cyclic_.RefreshFeedback();
+      }
     }
     else if (
       (arm_mode_ == k_api::Base::ServoingMode::LOW_LEVEL_SERVOING) &&

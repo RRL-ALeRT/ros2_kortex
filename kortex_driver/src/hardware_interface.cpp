@@ -251,7 +251,7 @@ CallbackReturn KortexMultiInterfaceHardware::on_init(const hardware_interface::H
   gripper_position_ = std::numeric_limits<double>::quiet_NaN();
 
   // set size of the twist interface
-  twist_commands_.resize(6, 0.0);
+  twist_commands_.resize(7, 0.0);
 
   for (const hardware_interface::ComponentInfo & joint : info_.joints)
   {
@@ -372,6 +372,8 @@ KortexMultiInterfaceHardware::export_command_interfaces()
     hardware_interface::CommandInterface("tcp", "twist.angular.y", &twist_commands_[4]));
   command_interfaces.emplace_back(
     hardware_interface::CommandInterface("tcp", "twist.angular.z", &twist_commands_[5]));
+  command_interfaces.emplace_back(
+    hardware_interface::CommandInterface("tcp", "gripper.vel", &twist_commands_[6]));
 
   command_interfaces.emplace_back(
     hardware_interface::CommandInterface("reset_fault", "command", &reset_fault_cmd_));
@@ -442,7 +444,8 @@ return_type KortexMultiInterfaceHardware::prepare_command_mode_switch(
     if (
       (key == "tcp/twist.linear.x") || (key == "tcp/twist.linear.y") ||
       (key == "tcp/twist.linear.z") || (key == "tcp/twist.angular.x") ||
-      (key == "tcp/twist.angular.y") || (key == "tcp/twist.angular.z"))
+      (key == "tcp/twist.angular.y") || (key == "tcp/twist.angular.z") ||
+      (key == "tcp/gripper.vel"))
     {
       stop_modes_.emplace_back(StopStartInterface::STOP_TWIST);
     }
@@ -491,7 +494,8 @@ return_type KortexMultiInterfaceHardware::prepare_command_mode_switch(
     if (
       (key == "tcp/twist.linear.x") || (key == "tcp/twist.linear.y") ||
       (key == "tcp/twist.linear.z") || (key == "tcp/twist.angular.x") ||
-      (key == "tcp/twist.angular.y") || (key == "tcp/twist.angular.z"))
+      (key == "tcp/twist.angular.y") || (key == "tcp/twist.angular.z") ||
+      (key == "tcp/gripper.vel"))
     {
       start_modes_.emplace_back(StopStartInterface::START_TWIST);
     }
@@ -589,7 +593,7 @@ return_type KortexMultiInterfaceHardware::perform_command_mode_switch(
   if (stop_twist_controller_)
   {
     twist_controller_running_ = false;
-    twist_commands_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    twist_commands_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   }
   if (stop_gripper_controller_)
   {
@@ -619,7 +623,7 @@ return_type KortexMultiInterfaceHardware::perform_command_mode_switch(
     base_.SetServoingMode(servoing_mode_hw_);
     arm_mode_ = k_api::Base::ServoingMode::SINGLE_LEVEL_SERVOING;
     joint_based_controller_running_ = false;
-    twist_commands_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    twist_commands_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     twist_controller_running_ = true;
   }
   if (start_gripper_controller_)
@@ -852,32 +856,34 @@ return_type KortexMultiInterfaceHardware::write(
   {
     if (arm_mode_ == k_api::Base::ServoingMode::SINGLE_LEVEL_SERVOING)
     {
-      rclcpp::Duration custom_period = rclcpp::Duration::from_seconds(1/25);
+      rclcpp::Duration custom_period = rclcpp::Duration::from_seconds(1/20);
 
       if (first_write_pass_ || (time - last_write_time_ ) > custom_period)
       {
         first_write_pass_ = false;
         last_write_time_ = time;
 
-        // Twist controller active
-        if (twist_controller_running_)
+        try
         {
-          // twist control
-          sendTwistCommand();
+          // Twist controller active
+          if (twist_controller_running_)
+          {
+            // twist control
+            sendTwistCommand();
+          }
+          else
+          {
+            // Keep alive mode - no controller active
+            RCLCPP_DEBUG(LOGGER, "No controller active in SINGLE_LEVEL_SERVOING mode!");
+          }
+
+          // read after write in twist mode
+          feedback_ = base_cyclic_.RefreshFeedback();
         }
-        else
+        catch (std::runtime_error & ex_runtime)
         {
-          // Keep alive mode - no controller active
-          RCLCPP_DEBUG(LOGGER, "No controller active in SINGLE_LEVEL_SERVOING mode!");
+          RCLCPP_ERROR_STREAM(LOGGER, "Runtime error: " << ex_runtime.what());
         }
-
-        // gripper control
-        sendGripperCommand(
-          arm_mode_, gripper_command_position_, gripper_command_max_velocity_,
-          gripper_command_max_force_);
-
-        // read after write in twist mode
-        feedback_ = base_cyclic_.RefreshFeedback();
       }
     }
     else if (
@@ -1025,13 +1031,34 @@ void KortexMultiInterfaceHardware::sendGripperCommand(
 
 void KortexMultiInterfaceHardware::sendTwistCommand()
 {
-  k_api_twist_->set_linear_x(static_cast<float>(twist_commands_[0]));
-  k_api_twist_->set_linear_y(static_cast<float>(twist_commands_[1]));
-  k_api_twist_->set_linear_z(static_cast<float>(twist_commands_[2]));
-  k_api_twist_->set_angular_x(static_cast<float>(twist_commands_[3]));
-  k_api_twist_->set_angular_y(static_cast<float>(twist_commands_[4]));
-  k_api_twist_->set_angular_z(static_cast<float>(twist_commands_[5]));
-  base_.SendTwistCommand(k_api_twist_command_);
+  // Send commands only if the values are changed
+  for (std::size_t i = 0; i < 6; i++)
+  {
+    if (previous_twist_commands_[i] != static_cast<float>(twist_commands_[i]))
+    {
+      k_api_twist_->set_linear_x(static_cast<float>(twist_commands_[0]));
+      k_api_twist_->set_linear_y(static_cast<float>(twist_commands_[1]));
+      k_api_twist_->set_linear_z(static_cast<float>(twist_commands_[2]));
+      k_api_twist_->set_angular_x(static_cast<float>(twist_commands_[3]));
+      k_api_twist_->set_angular_y(static_cast<float>(twist_commands_[4]));
+      k_api_twist_->set_angular_z(static_cast<float>(twist_commands_[5]));
+      base_.SendTwistCommand(k_api_twist_command_);
+
+      break;
+    }
+  }
+
+  {
+    k_api::Base::GripperCommand gripper_command;
+    gripper_command.set_mode(k_api::Base::GRIPPER_SPEED);
+    auto finger = gripper_command.mutable_gripper()->add_finger();
+    finger->set_finger_identifier(1);
+    finger->set_value(static_cast<float>(twist_commands_[6]));
+    base_.SendGripperCommand(gripper_command);
+  }
+
+  for (std::size_t i = 0; i < 6; i++)
+    previous_twist_commands_[i] = static_cast<float>(twist_commands_[i]);
 }
 
 }  // namespace kortex_driver

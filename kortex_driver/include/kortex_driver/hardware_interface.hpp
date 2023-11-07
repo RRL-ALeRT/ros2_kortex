@@ -141,6 +141,7 @@ private:
 
   // twist command interfaces
   std::vector<double> twist_commands_;
+  std::vector<float> previous_twist_commands_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Gripper
   k_api::GripperCyclic::MotorCommand * gripper_motor_command_;

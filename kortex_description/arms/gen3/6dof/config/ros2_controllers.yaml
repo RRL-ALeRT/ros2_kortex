@@ -17,10 +17,6 @@ controller_manager:
     fault_controller:
       type: picknik_reset_fault_controller/PicknikResetFaultController
 
-# joint_state_broadcaster:
-#   ros__parameters:
-#     update_rate: 25  # Hz
-
 joint_trajectory_controller:
   ros__parameters:
     joints:
@@ -53,6 +49,7 @@ twist_controller:
       - twist.angular.x
       - twist.angular.y
       - twist.angular.z
+      - gripper.vel
 
 robotiq_gripper_controller:
   ros__parameters:

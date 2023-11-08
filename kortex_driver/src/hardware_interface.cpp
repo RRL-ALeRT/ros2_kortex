@@ -671,7 +671,7 @@ CallbackReturn KortexMultiInterfaceHardware::on_activate(
   RCLCPP_INFO(LOGGER, "Gripper initial position is '%f'.", gripper_initial_position);
 
   // to radians
-  gripper_command_position_ = gripper_initial_position / 100.0 * 0.81;
+  gripper_command_position_ = gripper_initial_position / 100.0 * 0.71;
 
   // Initialize interconnect command to current gripper position.
   base_command_.mutable_interconnect()->mutable_command_id()->set_identifier(0);
@@ -796,11 +796,12 @@ return_type KortexMultiInterfaceHardware::read(
 void KortexMultiInterfaceHardware::readGripperPosition()
 {
   // max joint angle = 0.81 for robotiq_2f_85
+  // max joint angle = 0.71 for robotiq_2f_140
   // TODO(anyone) read in as parameter from kortex_controllers.yaml
   if (use_internal_bus_gripper_comm_)
   {
     gripper_position_ =
-      feedback_.interconnect().gripper_feedback().motor()[0].position() / 100.0 * 0.81;  // rad
+      feedback_.interconnect().gripper_feedback().motor()[0].position() / 100.0 * 0.71;  // rad
   }
 }
 
@@ -1004,13 +1005,13 @@ void KortexMultiInterfaceHardware::sendGripperCommand(
         auto finger = gripper_command.mutable_gripper()->add_finger();
         finger->set_finger_identifier(1);
         finger->set_value(
-          static_cast<float>(position / 0.81));  // This values needs to be between 0 and 1
+          static_cast<float>(position / 0.71));  // This values needs to be between 0 and 1
         base_.SendGripperCommand(gripper_command);
       }
       else if (arm_mode == k_api::Base::ServoingMode::LOW_LEVEL_SERVOING)
       {
         // % open/closed, this values needs to be between 0 and 100
-        gripper_motor_command_->set_position(static_cast<float>(position / 0.81 * 100.0));
+        gripper_motor_command_->set_position(static_cast<float>(position / 0.71 * 100.0));
         // % gripper speed between 0 and 100 percent
         gripper_motor_command_->set_velocity(static_cast<float>(velocity));
         // % max force threshold, between 0 and 100

@@ -141,6 +141,7 @@ private:
 
   // twist command interfaces
   std::vector<double> twist_commands_;
+  std::vector<float> previous_twist_commands_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Gripper
   k_api::GripperCyclic::MotorCommand * gripper_motor_command_;
@@ -192,6 +193,9 @@ private:
 
   // first pass flag
   bool first_pass_;
+  bool first_read_pass_, first_write_pass_ = true;
+  rclcpp::Time last_read_time_;
+  rclcpp::Time last_write_time_;
 
   // gripper stuff
   std::string gripper_joint_name_;

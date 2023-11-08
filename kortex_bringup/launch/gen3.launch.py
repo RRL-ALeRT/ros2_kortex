@@ -64,14 +64,14 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "gripper",
-            default_value='"robotiq_2f_85"',
+            default_value='"robotiq_2f_140"',
             description="Name of the gripper attached to the arm",
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
             "gripper_joint_name",
-            default_value="robotiq_85_left_knuckle_joint",
+            default_value="finger_joint",
             description="Name of the gripper attached to the arm",
         )
     )

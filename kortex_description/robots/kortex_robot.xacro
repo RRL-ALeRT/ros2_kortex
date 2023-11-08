@@ -58,15 +58,15 @@
     </xacro:load_arm>
 
     <!-- If no gripper, define tool frame here -->
-    <xacro:if value="${not gripper}">
+    <!-- <xacro:if value="${not gripper}"> -->
       <link name="${prefix}tool_frame"/>
       <joint name="${prefix}tool_frame_joint" type="fixed">
-        <origin xyz="0 0 0" rpy="0 0 0" />
+        <origin xyz="0 0 0.2" rpy="0 0 0" />
         <parent link="${prefix}${last_arm_link}" />
         <child link="${prefix}tool_frame" />
         <axis xyz="0 0 0" />
       </joint>
-    </xacro:if>
+    <!-- </xacro:if> -->
 
     <!-- Include and load the gripper if defined -->
     <xacro:unless value="${not gripper}">

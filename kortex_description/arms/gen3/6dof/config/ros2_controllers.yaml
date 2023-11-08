@@ -49,9 +49,10 @@ twist_controller:
       - twist.angular.x
       - twist.angular.y
       - twist.angular.z
+      - gripper.vel
 
 robotiq_gripper_controller:
   ros__parameters:
     default: true
-    joint: robotiq_85_left_knuckle_joint
+    joint: finger_joint
     allow_stalling: true

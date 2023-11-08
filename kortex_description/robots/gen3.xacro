@@ -29,7 +29,7 @@
     <xacro:include filename="$(find kortex_description)/robots/kortex_robot.xacro" />
     <link name="world" />
     <xacro:load_robot
-        parent="world"
+        parent="body"
         arm="$(arg arm)"
         gripper="$(arg gripper)"
         gripper_joint_name="$(arg gripper_joint_name)"

@@ -185,7 +185,7 @@ def launch_setup(context, *args, **kwargs):
 
     nodes_to_start = [
         control_node,
-        robot_state_publisher_node,
+        # robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
         robot_traj_controller_spawner,

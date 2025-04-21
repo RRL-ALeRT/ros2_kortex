@@ -43,9 +43,17 @@ def generate_launch_description():
             description="Name of the gripper attached to the arm",
         )
     )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "dof",
+            default_value="7",
+            description="Robot's dof",
+        )
+    )
 
     robot_type = LaunchConfiguration("robot_type")
     gripper = LaunchConfiguration("gripper")
+    dof = LaunchConfiguration("dof")
 
     robot_description_content = Command(
         [
@@ -65,6 +73,9 @@ def generate_launch_description():
             "gripper:=",
             gripper,
             " ",
+            "dof:=",
+            dof,
+            " ",
         ]
     )
     robot_description = {"robot_description": robot_description_content}
@@ -78,12 +89,6 @@ def generate_launch_description():
         executable="robot_state_publisher",
         output="screen",
         parameters=[robot_description],
-    )
-
-    joint_state_publisher = Node(
-        package="joint_state_publisher",
-        executable="joint_state_publisher",
-        output="screen",
     )
 
     joint_state_publisher_gui = Node(
@@ -102,7 +107,6 @@ def generate_launch_description():
 
     nodes_to_start = [
         robot_state_publisher,
-        joint_state_publisher,
         joint_state_publisher_gui,
         rviz,
     ]

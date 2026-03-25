@@ -1,0 +1,45 @@
+# joint_limits.yaml allows the dynamics properties specified in the URDF to be overwritten or augmented as needed
+
+# For beginners, we downscale velocity and acceleration limits.
+default_velocity_scaling_factor: 1.0
+default_acceleration_scaling_factor: 1.0
+
+joint_limits:
+  joint_1:
+    has_velocity_limits: true
+    max_velocity: 0.4
+    has_acceleration_limits: true
+    max_acceleration: 0.8
+  joint_2:
+    has_velocity_limits: true
+    max_velocity: 0.4
+    has_acceleration_limits: true
+    max_acceleration: 0.8
+  joint_3:
+    has_position_limits: true
+    min_position: -2.57
+    max_position: 2.57
+    has_velocity_limits: true
+    max_velocity: 0.4
+    has_acceleration_limits: true
+    max_acceleration: 0.8
+  joint_4:
+    has_velocity_limits: true
+    max_velocity: 0.4
+    has_acceleration_limits: true
+    max_acceleration: 0.8
+  joint_5:
+    has_velocity_limits: true
+    max_velocity: 0.4
+    has_acceleration_limits: true
+    max_acceleration: 0.8
+  joint_6:
+    has_velocity_limits: true
+    max_velocity: 0.4
+    has_acceleration_limits: true
+    max_acceleration: 0.8
+  finger_joint:
+    has_velocity_limits: true
+    max_velocity: 0.5
+    has_acceleration_limits: true
+    max_acceleration: 1.0

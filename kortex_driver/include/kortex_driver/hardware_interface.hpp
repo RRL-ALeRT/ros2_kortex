@@ -132,6 +132,7 @@ private:
   std::size_t actuator_count_;
   // To minimize bandwidth we synchronize feedback with the robot only when write() is called
   k_api::BaseCyclic::Feedback feedback_;
+  k_api::BaseCyclic::Feedback feedback_temp_;  // temporary buffer for safe swap
   std::vector<double> arm_commands_positions_;
   std::vector<double> arm_commands_velocities_;
   std::vector<double> arm_commands_efforts_;
@@ -141,6 +142,7 @@ private:
 
   // twist command interfaces
   std::vector<double> twist_commands_;
+  std::vector<float> previous_twist_commands_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Gripper
   k_api::GripperCyclic::MotorCommand * gripper_motor_command_;
@@ -153,7 +155,7 @@ private:
   double gripper_speed_command_ = 0.0;
 
   rclcpp::Time controller_switch_time_;
-  std::atomic<bool> block_write = false;
+  std::atomic<bool> block_write{false};
   k_api::Base::ServoingMode arm_mode_;
 
   // Enum defining at which control level we are
@@ -182,6 +184,10 @@ private:
   // (different controllers claim different interfaces)
   std::vector<StopStartInterface> stop_modes_;
   std::vector<StopStartInterface> start_modes_;
+  
+  // mutex to protect write path during controller switching
+  std::mutex write_mutex_;
+  
   // switching auxiliary booleans
   bool stop_joint_based_controller_;
   bool stop_twist_controller_;
@@ -221,6 +227,7 @@ private:
     k_api::Base::ServoingMode arm_mode, double position, double velocity, double force);
 
   void readGripperPosition();
+  void updateFeedback(const k_api::BaseCyclic::Feedback & new_feedback);
 };
 
 }  // namespace kortex_driver

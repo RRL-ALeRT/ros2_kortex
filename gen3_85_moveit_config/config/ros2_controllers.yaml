@@ -7,16 +7,8 @@ controller_manager:
       type: joint_trajectory_controller/JointTrajectoryController
 
 
-    twist_controller:
-      type: picknik_twist_controller/PicknikTwistController
-
-
     robotiq_gripper_controller:
       type: position_controllers/GripperActionController
-
-
-    fault_controller:
-      type: picknik_reset_fault_controller/PicknikResetFaultController
 
 
     joint_state_broadcaster:
@@ -33,17 +25,10 @@ joint_trajectory_controller:
       - joint_6
     command_interfaces:
       - position
+      - velocity
     state_interfaces:
       - position
       - velocity
-twist_controller:
-  ros__parameters:
-    joints:
-      - tcp
 robotiq_gripper_controller:
   ros__parameters:
     joint: finger_joint
-fault_controller:
-  ros__parameters:
-    joints:
-      []

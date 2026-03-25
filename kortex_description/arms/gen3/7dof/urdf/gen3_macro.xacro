@@ -63,9 +63,9 @@
     <joint name="${prefix}base_joint" type="fixed">
       <xacro:insert_block name="origin" />
       <parent link="${parent}"/>
-      <child link="${prefix}base_link" />
+      <child link="${prefix}gen3_base_link" />
     </joint>
-    <link name="${prefix}base_link">
+    <link name="${prefix}gen3_base_link">
       <inertial>
         <origin xyz="-0.000648 -0.000166 0.084487" rpy="0 0 0" />
         <mass value="1.697" />

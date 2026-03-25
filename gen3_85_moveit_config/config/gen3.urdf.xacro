@@ -3,7 +3,7 @@
     <xacro:arg name="initial_positions_file" default="initial_positions.yaml" />
 
     <!-- Import gen3 urdf file -->
-    <xacro:include filename="$(find kortex_description)/robots/gen3.urdf" />
+    <xacro:include filename="$(find kortex_description)/robots/gen3_2f85.urdf" />
 
     <!-- Import control_xacro -->
     <xacro:include filename="gen3.ros2_control.xacro" />

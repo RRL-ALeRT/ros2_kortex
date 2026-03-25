@@ -152,15 +152,17 @@ def launch_setup(context, *args, **kwargs):
         "/" + prefix_str + "/robot_description" if prefix_str else "/robot_description"
     )
     control_node = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[load_and_apply_prefix(robot_controllers_str, prefix_str)],
-        namespace=prefix_str,
-        remappings=[
-            ("~/robot_description", remapped_robot_description),
-        ],
-        output="both",
-    )
+    package="controller_manager",
+    executable="ros2_control_node",
+    parameters=[load_and_apply_prefix(robot_controllers_str, prefix_str)],
+    namespace=prefix_str,
+    remappings=[
+        ("~/robot_description", remapped_robot_description),
+    ],
+    arguments=["--ros-args", "--log-level", "info"],
+    output="both",
+)
+
 
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
@@ -285,21 +287,21 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "session_inactivity_timeout_ms",
             description="Robot session inactivity timeout in milliseconds.",
-            default_value="60000",
+            default_value="120000",  # Increase to 2 minutes
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
             "connection_inactivity_timeout_ms",
             description="Robot connection inactivity timeout in milliseconds.",
-            default_value="2000",
+            default_value="5000",  # Increase to 5 seconds
         )
     )
     # General arguments
     declared_arguments.append(
         DeclareLaunchArgument(
             "controllers_file",
-            default_value="ros2_controllers_dual_arm_test.yaml",
+            default_value="ros2_controllers.yaml",
             description="YAML file with the controllers configuration.",
         )
     )
@@ -385,7 +387,7 @@ def generate_launch_description():
         )
     )
     declared_arguments.append(
-        DeclareLaunchArgument("launch_rviz", default_value="true", description="Launch RViz?")
+        DeclareLaunchArgument("launch_rviz", default_value="false", description="Launch RViz?")
     )
     declared_arguments.append(
         DeclareLaunchArgument(

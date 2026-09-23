@@ -1,13 +1,13 @@
 moveit_setup_assistant_config:
   urdf:
-    package: kortex_description
-    relative_path: robots/gen3_2f85.urdf
+    package: spot_description
+    relative_path: urdf/spot.urdf.xacro
   srdf:
     relative_path: config/gen3.srdf
   package_settings:
     author_name: Ninad Kulkarni
     author_email: kulkarni@fh-aachen.de
-    generated_timestamp: 1774370194
+    generated_timestamp: 1774532725
   control_xacro:
     command:
       - position

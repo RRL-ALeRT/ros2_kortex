@@ -9,6 +9,9 @@ moveit_simple_controller_manager:
 
   joint_trajectory_controller:
     type: FollowJointTrajectory
+    allowed_execution_duration_scaling: 2.0  
+    allowed_goal_duration_margin: 5.0        
+    # allowed_start_tolerance: 0.02
     joints:
       - joint_1
       - joint_2

@@ -27,6 +27,7 @@ find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(kortex_api REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 #Current: only support Linux x86_64
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
@@ -47,6 +48,15 @@ set_target_properties(KortexApiCpp PROPERTIES
 )
 target_link_libraries(KortexApiCpp INTERFACE pthread)
 add_dependencies(KortexApiCpp kortex_api)
+
+add_executable(kortex_js_publisher src/joint_states_publisher.cpp)
+add_dependencies(kortex_js_publisher KortexApiCpp)
+target_link_libraries(kortex_js_publisher KortexApiCpp)
+ament_target_dependencies(
+  kortex_js_publisher
+  SYSTEM kortex_api
+  rclcpp 
+  sensor_msgs)
 
 ## COMPILE
 add_library(
@@ -80,6 +90,10 @@ install(
 install(
   DIRECTORY include/
   DESTINATION include
+)
+install(
+  TARGETS kortex_js_publisher
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)

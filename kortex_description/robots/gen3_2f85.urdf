@@ -4,7 +4,7 @@
 <!-- |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED                                 | -->
 <!-- =================================================================================== -->
 <robot name="gen3">
-  <link name="world"/>
+  <!-- <link name="world"/> -->
   <ros2_control name="KortexMultiInterfaceHardware" type="system">
     <hardware>
       <plugin>kortex_driver/KortexMultiInterfaceHardware</plugin>
@@ -93,11 +93,11 @@
       <state_interface name="velocity"/>
     </joint>
   </ros2_control>
-  <joint name="base_joint" type="fixed">
+  <!-- <joint name="base_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.3 0 0.08"/>
     <parent link="world"/>
     <child link="gen3_base_link"/>
-  </joint>
+  </joint> -->
   <link name="gen3_base_link">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.000648 -0.000166 0.084487"/>
@@ -591,46 +591,8 @@
             <mimic joint="finger_joint" />
         </joint>
   <!-- Front CB -->
-  <link name="front_collision">
-    <visual>
-        <geometry>
-        <box size="0.10 0.10 0.10" />
-        </geometry>
-        <material name="red">
-        <color rgba="1 0 0 1" />
-        </material>
-    </visual>
-    <collision>
-        <geometry>
-        <box size="0.10 0.10 0.10" />
-        </geometry>
-    </collision>
-    </link>
-    <joint name="body_front_collision" type="fixed">
-        <child link="front_collision" />
-        <parent link="world" />
-        <origin xyz="0.42 0 0.125" rpy="0  0.3 0" />
-  </joint>
+  
 
   <!--Back CB-->
-  <link name="rear_collision">
-    <visual>
-      <geometry>
-        <box size="0.55 0.10 0.10"/>
-      </geometry>
-      <material name="red">
-        <color rgba="1 0 0 1"/>
-      </material>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.55 0.10 0.10"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="body_rear_collision" type="fixed">
-    <child link="rear_collision"/>
-    <parent link="world"/>
-    <origin rpy="0 0 0" xyz="-0.05 0 0.15"/>
-  </joint>
+  
 </robot>
